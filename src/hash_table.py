@@ -1,4 +1,7 @@
 class HashTable:
+    # Hash Table to be used as dictionary in LZW Algorithm
+    # Uses chaining (open hashing) for collision resolution
+
     # Nested Class: _LinkedList
     class _LinkedList:
         # Nested Class: _Node
@@ -24,7 +27,7 @@ class HashTable:
 
         def add(self, key, code):
             # Adds a new node at the front of the linked list with key "key" and code "code"
-            newNode = _Node(key, code)
+            newNode = self._Node(key, code)
             newNode.next = self.head
             self.head = newNode
 
@@ -35,13 +38,12 @@ class HashTable:
                 else: return self.getCode(key, _node.next)
             return None
 
-    def __init__(self, length = 4096):
-        self.length = length #length of the hash table
-        self.table = [_LinkedList() for i in range(length)]        
-
-        self.items = 0 #items currently present in the hash table
-        # Initialise the hash table with first 256 unicode characters
-        for i in range(256): self.add_element(chr(i))
+    def __init__(self, length = 4096, toEncode = False):
+        self.length = length # length of the hash table
+        self.table = [self._LinkedList() for i in range(length)]        
+        self.items = 0 # items currently present in the hash table
+        self.toEncode = toEncode # if true then hash table set for encoding, else it is set for decoding
+        for i in range(256): self.add_element(chr(i)) # initialise the hash table with first 256 UNICODE characters
 
     def __str__(self):
         s = str(self.table[0])
@@ -50,20 +52,31 @@ class HashTable:
         return s
         
     def hashFunc(self, key):
-        # Hashes a given key by summing up the UNICODE values of the individual characters of the key and then taking modulo length
-        hashValue = 0
-        for i in key: hashValue += ord(i)
+        # Hashes a given key by:
+        # 1. summing up the UNICODE values of the individual characters of the key and then taking modulo length if encoding
+        # 2. taking ( key modulo length ) if decoding 
+        if self.toEncode:
+            hashValue = 0
+            for i in key: hashValue += ord(i)
+        else: hashValue = key
         hashValue %= self.length
         return hashValue
 
-    def add_element(self, key):
-        # Uses chaining (open hashing) for collision resolution
-        self.table[self.hashFunc(key)].add(key, code = self.items)
+    def add_element(self, toAdd):
+        if self.toEncode: 
+            # While encoding 'key' is the string and 'code' is its respective item number
+            key = toAdd
+            code = self.items
+        else: 
+            # While decoding 'key' is the item number and 'code' is the string to be stored
+            code = toAdd
+            key = self.items
+        self.table[self.hashFunc(key)].add(key, code)
         self.items += 1
     
-    def search(self, key):
-        ht = self.table[self.hashFunc(key)]
-        return ht.getCode(key, ht.head)
+    def searchKey(self, key):
+        ll = self.table[self.hashFunc(key)]
+        return ll.getCode(key, ll.head)
 
 if __name__ == "__main__":
     ht = HashTable(25)
