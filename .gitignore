@@ -1,0 +1,8 @@
+/.vscode/
+/.idea/
+/out/
+/docs/
+/test/
+**/text/
+**/__pycache__/
+**/test.py

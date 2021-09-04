@@ -19,9 +19,9 @@ class HashTable:
                 return "--"
 
             temp = self.head.next
-            s = "(" + self.head.key + ", " + str(self.head.code) + ")"
+            s = "(" + str(self.head.key) + ", " + str(self.head.code) + ")"
             while temp != None:
-                s += ", " + "(" + temp.key + ", " + str(temp.code) + ")"
+                s += ", " + "(" + str(temp.key) + ", " + str(temp.code) + ")"
                 temp = temp.next
             return s
 
@@ -42,8 +42,9 @@ class HashTable:
         self.length = length # length of the hash table
         self.table = [self._LinkedList() for i in range(length)]        
         self.items = 0 # items currently present in the hash table
-        self.toEncode = toEncode # if true then hash table set for encoding, else it is set for decoding
-        for i in range(256): self.add_element(chr(i)) # initialise the hash table with first 256 UNICODE characters
+        # if true then hash table set for encoding, else it is set for decoding
+        self._toEncode = toEncode
+        for i in range(256): self.addElement(chr(i)) # initialise the hash table with first 256 UNICODE characters
 
     def __str__(self):
         s = str(self.table[0])
@@ -55,15 +56,15 @@ class HashTable:
         # Hashes a given key by:
         # 1. summing up the UNICODE values of the individual characters of the key and then taking modulo length if encoding
         # 2. taking ( key modulo length ) if decoding 
-        if self.toEncode:
+        if self._toEncode:
             hashValue = 0
             for i in key: hashValue += ord(i)
         else: hashValue = key
         hashValue %= self.length
         return hashValue
 
-    def add_element(self, toAdd):
-        if self.toEncode: 
+    def addElement(self, toAdd):
+        if self._toEncode: 
             # While encoding 'key' is the string and 'code' is its respective item number
             key = toAdd
             code = self.items
@@ -71,16 +72,9 @@ class HashTable:
             # While decoding 'key' is the item number and 'code' is the string to be stored
             code = toAdd
             key = self.items
-        self.table[self.hashFunc(key)].add(key, code)
+        self.table[self.hashFunc(key)].add(key, code) # hashing (key, code) pair
         self.items += 1
     
     def searchKey(self, key):
         ll = self.table[self.hashFunc(key)]
         return ll.getCode(key, ll.head)
-
-if __name__ == "__main__":
-    ht = HashTable(25)
-    ht.add_element("mkv")
-    
-    print(ht)
-    print(ht.search('mkv'))
